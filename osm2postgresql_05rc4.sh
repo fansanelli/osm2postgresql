@@ -145,7 +145,6 @@ OPTIONAL PARAMETERS WHICH MUST BE FOLLOWED BY A VARIABLE:
                          In this case you must mkdir and chown yourself before.
 -m, --temporarydir      where to save the files created by osmosis
 -P, --postgis           folder where to find the sql commands to install postgis in database
--H, --hstore            folder where to find the sql commands to install hstore in database
 -E, --EPSG              new SRID (EPSG) code (if you want to reproject the geometries)
                           do not use to keep data in lat/long.
 -I, --installdir        where to install the postgres server (with --install option);
@@ -223,8 +222,6 @@ while [ "$1" != "" ]; do
 # If you have several hard disks, you can choose which one you want to use (the disk space you use is called a 'TABLESPACE' in postgresql).
     -P | --postgis )     shift  # folder where to find the sql commands to install postgis
                         postgisfolder=$1 ;;
-    -H | --hstore )     shift # folder where to find the sql commands to install hstore
-                        hstorefolder=$1 ;;
     -E | --EPSG )     shift # new SRID (EPSG code) if you want to reproject the geometries
                         EPSG=$1 ;;
     -r | --rivers_as_is)    rivers="keep" ;; # keep rivers, streams... untouched
@@ -406,7 +403,8 @@ if [[ ( "$install" = "no" ) && ( "$createdb" = "yes" ) ]]; then
 
   ${psql_folder}psql  $pgconnect_user --file $postgisfolder/postgis.sql
   ${psql_folder}psql  $pgconnect_user --file $postgisfolder/spatial_ref_sys.sql
-  ${psql_folder}psql  $pgconnect_user --file $hstorefolder/hstore.sql
+  # Pre v9.1
+  # ${psql_folder}psql  $pgconnect_user --file $hstorefolder/hstore.sql
 
 fi
 
@@ -418,7 +416,8 @@ tar --extract --gzip --keep-old-files --file osmosis-0.40.tgz # Keep old (user-c
 osmosis_version=osmosis-0.40
 echo $osmosis_version
 
-
+# >=v9.1, requires 'postgres-contrib' pkg
+${psql_folder}psql $pgconnect_user -c "CREATE EXTENSION hstore;"
 
 ${psql_folder}psql $pgconnect_user -f ./$osmosis_version/script/pgsnapshot_schema_0.6.sql  # -d $dbname
 ${psql_folder}psql $pgconnect_user -f ./$osmosis_version/script/pgsnapshot_schema_0.6_bbox.sql  # -d $dbname

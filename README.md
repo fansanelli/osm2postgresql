@@ -8,4 +8,4 @@ I'M NOT THE AUTHOR OF THE CODE AND ALL CREDITS GOES TO mayeul.
 
 Changelog:
 
-- none
+- add support PostgreSQL v9.1+ (previous versions and install will not work)
